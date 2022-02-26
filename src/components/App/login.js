@@ -2,30 +2,52 @@ import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { LoginPage, LoginPageDiv } from "./styles.js"
+import { handleLogin, handleRegister } from "../services/UserService"
+import { useNavigate } from "react-router-dom";
+
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
 
   function validateForm() {
-    return email.length > 0 && password.length > 0;
+    return name.length > 0 && password.length > 0;
   }
 
-  function handleSubmit(event) {
-    event.preventDefault();
+  function SubmitLogin(event) {
+    const response = handleLogin(name, password)
+    if (!response.name) {
+      navigate("/login");
+    }
+    const user = {name: response.name, id: response.id}
+    localStorage.setItem('user', JSON.stringify(user));
+    navigate("/home");
+    return false;
+  }
+
+  function SubmitRegister(event) {
+    const response = handleRegister(name, password)
+    if (!response.name) {
+      navigate("/login");
+    }
+    const user = {name: name, id: response.id}
+    localStorage.setItem('user', JSON.stringify(user));
+    navigate("/home");
+    return false;
   }
 
   return (
       <LoginPage>
-        <Form onSubmit={handleSubmit}>
+        <Form>
             <h2>Welcome back!</h2>
-            <Form.Group controlId="email">
-            <Form.Label>Email</Form.Label>
+            <Form.Group controlId="name">
+            <Form.Label>Name</Form.Label>
             <Form.Control
                 autoFocus
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
             />
             </Form.Group>
             <Form.Group controlId="password">
@@ -36,10 +58,13 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
             />
             </Form.Group>
-            <Button type="submit" disabled={!validateForm()}>
+        </Form>
+        <Button disabled={!validateForm()} onClick={SubmitLogin}>
             Login
             </Button>
-        </Form>
+            <Button disabled={!validateForm()} onClick={SubmitRegister}>
+            Register
+            </Button>
     </LoginPage>
   );
 }

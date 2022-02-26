@@ -275,72 +275,33 @@ export const Modal = styled.div`
                 background:     ${Color('#10c694').darken(0.2).toString()};
             }
         }
-        input {
+        & .form-label {
             display: block;
-            background: #efefef;
-            border: none;
-            border-radius: 4px;
-            height: 50px;
-            width: calc(100% - 32px);
-            padding: 0 16px;
-            margin: 20px auto;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #a4a4a4;
         }
-        section {
-            border-top: 1px solid #dddddd;
-            > div {
-                padding: 20px;
-                svg {
-                    display: block;
-                    margin: 0 auto;
-                }
-            }
-            article {
-                max-height: 132px;
-                padding: 10px 20px;
-                display: flex;
-                align-items: center;
-                border-bottom: 1px solid #dddddd;
-                &:last-child {
-                    border-bottom: none;
-                }
-                img {
-                    height: 100px;
-                }
- 
-                h3 {
-                    font-size: 14px;
-                    font-weight: normal;
-                    padding: 10px 20px;
-                }
- 
-                span {
-                    font-size: 12px;
-                    text-align: right;
-                    border: 1px solid #ddd;
-                    line-height: 21px;
-                    height: 21px;
-                    padding: 4px 8px;
-                    border-radius: 3px;
-                    color: #666;
-                    margin-right: 10px;
-                }
- 
-                button {
-                    cursor: pointer;
-                    background: #10c694;
-                    height: 40px;
-                    color: white;
-                    border: none;
-                    font-size: 21px;
-                    padding: 0 20px;
-                    border-radius: 20px;
-                    text-transform: uppercase;
-                    transition: all 250ms ease-in-out 0s;
-                    &:hover {
-                        background: ${Color('#10c694').darken(0.2).toString()};
-                    }
-                }
-            }
+        & .form-control {
+            padding: 8px 0px;
+            margin-bottom: 10px;
+            width: 100%;
+            font-size: 16px;
+            background: ${Color('#ebe2e1').alpha(0.5).toString()};;
+            border: none;
+            color: #b8b6b6;
+            border-radius: 4px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        & .form-control:hover {
+            background: #404040;
+        }
+        & .form-control:focus {
+            box-shadow: 0px 0px 0px 1px #0087ff;
+        }
+        & .form-group {
+            display: block;
+            margin-bottom: 20px;
         }
     }
 `;
@@ -374,11 +335,11 @@ export const LoginPage = styled(Form)`
     }
         
     }
-    Button {
+    & Button {
         padding: 10px 18px;
         font-size: 15px;
-        margin-top: 50px;
-        margin-bottom: 20px;
+        margin-top: 10px;
+        margin-bottom: 0px;
         background: #1a3969;
         width: 100%;
         border: none;
@@ -386,10 +347,10 @@ export const LoginPage = styled(Form)`
         color: #f4f4f4;
         transition: all 0.2s ease;
     }
-    Button:hover {
+    & Button:hover {
         opacity: 0.9;
     }
-    Button:focus {
+    & Button:focus {
         box-shadow: 0px 0px 0px 3px black;
     }
     & .form-label {

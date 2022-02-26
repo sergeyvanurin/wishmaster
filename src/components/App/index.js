@@ -1,36 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { Header, Main, Item, Modal} from './styles';
+import {getUserId, getUser, PostNewItem, PostRemoveItem} from '../services/UserService'
+import { PrivateWrapper } from '../PrivateRoute';
 import Login from "./login";
 
 import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link
+  Navigate,
+  useNavigate
 } from "react-router-dom";
 
 export default function App() {
   return (
-    <Router>
+    <Router basename='/wishmaster'>
         <Routes>
           <Route path="/home"  element={<Home/>}></Route>
           <Route path="/login"  element={<Login/>}></Route>
+          <Route path="/"  element={<Navigate to="/login" />}></Route>
         </Routes>
     </Router>
   );
 }
 
 function Home() {
-  const [items, setItems] = useState([
-    {
-      "name": "CASOFU Burritos Blanket, Giant Flour Tortilla Throw Blanket, Novelty Tortilla Blanket for Your Family, Soft and Comfortable Flannel Taco Blanket for Kids. (Burrito-a, 60inches)",
-       "url": "https://www.amazon.com/CASOFU-Tortilla-Comfortable-Burrito-60inches/dp/B07QTHK8K9/ref=sr_1_1?dchild=1&keywords=burrito+blanket&qid=1586045729&sr=8-1",
-       "image": "https://m.media-amazon.com/images/I/811OenUrCyL._AC_UL320_ML3_.jpg",
-       "price": "19.94"
-    }
-  ]);
+  const navigate = useNavigate();
+  const [items, setItems] = useState([]);
+
+  const addNewItem = () => {
+    PostNewItem(User.id, {
+      name: NewItemName,
+      url: NewItemURL,
+      img_url: NewItemImg,
+      price: NewItemPrice
+    })
+      .then(Response => {
+          setItems([...items, {
+            name: NewItemName,
+            url: NewItemURL,
+            img_url: NewItemImg,
+            price: NewItemPrice
+          }]);
+      })
+      .catch(e => {
+        
+      });
+  }
+
+  const RemoveItem = (k) => {
+    PostRemoveItem(User.id, items[k])
+      .then(Response => {
+        const newItems = [...items.slice(0, k), ...items.slice(k + 1)];
+        setItems(newItems);
+      })
+      .catch(e => {
+
+      });
+  }
 
   const [showModal, setShowModal] = useState(false);
 
@@ -38,21 +67,61 @@ function Home() {
     setShowModal(!showModal);
   }
 
-  const [NewItemName, setName] = useState("");
+  const [NewItemName, setNewItemName] = useState("");
   const [NewItemURL, setNewItemURL] = useState("");
   const [NewItemImg, setNewItemImg] = useState("");
+  const [NewItemPrice, setNewItemPrice] = useState("");
+
+  const [User, setUser] = useState(JSON.parse(localStorage.getItem("user")))
+
 
   function handleNewItemSubmit(event) {
-    event.preventDefault();
+    addNewItem()
+    setNewItemName("");
+    setNewItemURL("");
+    setNewItemImg("");
+    setNewItemPrice(null)
+    setShowModal(!showModal);
+    console.log("item added");
   }
 
+  const handleItemRemove = (k) => {
+    RemoveItem(k)
+    const newItems = [...items.slice(0, k), ...items.slice(k + 1)];
+        setItems(newItems);
+  }
 
-return (<div>
+useEffect(() => {
+  console.log("useEffect title");
+  
+  if (!User.name) {
+    navigate("/login")
+  }
+  console.log(User.id)
+  console.log(User.name)
+
+  if (!User.id){
+    getUserId(User.name).then(
+    Response => {
+      setUser({name: User.name, id: Response.id})
+      localStorage.setItem('user', JSON.stringify(User));
+    }
+  )
+  getUser(User.id).then(
+    Response => {
+      setItems(Response.items)
+    }
+  )
+  }
+}, [User, navigate])
+
+return (
+<div>
   <Header>
   <div>
     <a href="https://vk.com/vanur">
       <img alt="svanur" src="https://sun1-91.userapi.com/s/v1/if1/y2AQQWjOZTShMcq7vcgrrfHcthqSkoFv6CTl7jEElkZ1vfJ4QO4t07EIkWvIaRbrMOlmkCkR.jpg?size=200x266&quality=96&crop=0,0,720,960&ava=1" />
-      <h1>@svanur</h1>
+      <h1>{User.name}</h1>
       <p>Personal Wishlist</p>
     </a>
   </div>
@@ -64,25 +133,25 @@ return (<div>
                 {items.map((i, k) => <Item key={`Item-${k}`}>
                     <dl>
                       <dt>...</dt>
-                      <dd>Delete</dd>
+                      <Button onClick={() => handleItemRemove(k)}> Delete </Button>
                     </dl>
                     <span>${i.price}</span>
                     <img alt={i.name} src={i.image} /> 
                     <h3>{i.name}</h3>
-                    <a href={i.url} target="_blank" rel="noopener noreferrer">View On Amazon</a>
+                    <a href={i.url} target="_blank" rel="noopener noreferrer">View</a>
                 </Item>)}
               </section> 
-            : <section><p>No items yet<br/><span>Start By Adding An Item</span></p></section>}
+            : <section><p>No items yet<br/></p></section>}
     </Main>
     <Modal show={showModal}>
       <div>
         <button onClick={onClickToggleModal}>&times;</button>
         <h1>Add Item</h1>
-        <Form onSubmit={handleNewItemSubmit}>
+        <Form>
             <Form.Group>
             <Form.Label>Name</Form.Label>
             <Form.Control
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setNewItemName(e.target.value)}
             />
             </Form.Group>
             <Form.Group>
@@ -97,10 +166,16 @@ return (<div>
                 onChange={(e) => setNewItemImg(e.target.value)}
             />
             </Form.Group>
-            <Button type="submit">
-            Submit
-            </Button>
+            <Form.Group>
+            <Form.Label>Price</Form.Label>
+            <Form.Control
+                onChange={(e) => setNewItemPrice(e.target.value)}
+            />
+            </Form.Group>
         </Form>
+        <Button onClick={handleNewItemSubmit}>
+            Submit
+        </Button>
       </div>
     </Modal>
     </div>);
